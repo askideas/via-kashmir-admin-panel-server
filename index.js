@@ -2,15 +2,18 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { initializeFirebase } = require('./config/firebase');
+const { initializeImageKit } = require('./config/imagekit');
 
 // Import routes
 const categoryRoutes = require('./routes/categories');
+const employeeRoutes = require('./routes/employees');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize Firebase
+// Initialize Firebase and ImageKit
 initializeFirebase();
+initializeImageKit();
 
 // Middleware
 app.use(cors());
@@ -28,6 +31,7 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/categories', categoryRoutes);
+app.use('/employees', employeeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
