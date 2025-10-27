@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/categoryController');
+const { verifyToken } = require('../middleware/auth');
+
+// Apply authentication middleware to all category routes
+router.use(verifyToken);
 
 // GET /categories - Get all categories
 router.get('/', categoryController.getAllCategories);

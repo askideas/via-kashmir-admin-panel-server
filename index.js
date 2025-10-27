@@ -5,6 +5,7 @@ const { initializeFirebase } = require('./config/firebase');
 const { initializeImageKit } = require('./config/imagekit');
 
 // Import routes
+const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/categories');
 const employeeRoutes = require('./routes/employees');
 
@@ -32,8 +33,9 @@ app.get('/', (req, res) => {
         status: 'success',
         timestamp: new Date().toISOString(),
         endpoints: {
-            categories: '/categories',
-            employees: '/employees'
+            auth: '/auth',
+            categories: '/categories (requires authentication)',
+            employees: '/employees (requires authentication)'
         }
     });
 });
@@ -48,6 +50,7 @@ app.get('/health/employees', (req, res) => {
 });
 
 // API Routes
+app.use('/auth', authRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/employees', employeeRoutes);
 

@@ -2,6 +2,10 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const employeeController = require('../controllers/employeeController');
+const { verifyToken } = require('../middleware/auth');
+
+// Apply authentication middleware to all employee routes
+router.use(verifyToken);
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage(); // Store files in memory as Buffer
