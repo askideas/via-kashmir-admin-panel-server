@@ -58,14 +58,26 @@ const addEmployee = async (req, res) => {
             // Upload profile picture if provided
             if (files && files.profilePicture && files.profilePicture[0]) {
                 const profilePicFile = files.profilePicture[0];
+                
+                console.log(`📤 Uploading profile picture for employee ${employeeId}`);
+                
                 const profilePicResult = await uploadToImageKit(
                     profilePicFile,
-                    `profile_${employeeId}.${profilePicFile.originalname.split('.').pop()}`,
-                    employeeFolderPath
+                    `profile_${employeeId}.jpg`, // Force .jpg extension for consistency
+                    employeeFolderPath,
+                    {
+                        compressImages: true,
+                        targetSizeKB: 30
+                    }
                 );
 
                 if (profilePicResult.success) {
                     profilePictureUrl = profilePicResult.data.url;
+                    
+                    // Log compression stats if available
+                    if (profilePicResult.data.compression) {
+                        console.log(`✅ Profile picture compressed: ${profilePicResult.data.compression.compressionRatio}% reduction`);
+                    }
                 } else {
                     return res.status(400).json({
                         success: false,
@@ -78,14 +90,26 @@ const addEmployee = async (req, res) => {
             // Upload government proof if provided
             if (files && files.governmentProof && files.governmentProof[0]) {
                 const govProofFile = files.governmentProof[0];
+                
+                console.log(`📤 Uploading government proof for employee ${employeeId}`);
+                
                 const govProofResult = await uploadToImageKit(
                     govProofFile,
-                    `government_proof_${employeeId}.${govProofFile.originalname.split('.').pop()}`,
-                    employeeFolderPath
+                    `government_proof_${employeeId}.jpg`, // Force .jpg extension for consistency
+                    employeeFolderPath,
+                    {
+                        compressImages: true,
+                        targetSizeKB: 30
+                    }
                 );
 
                 if (govProofResult.success) {
                     governmentProofUrl = govProofResult.data.url;
+                    
+                    // Log compression stats if available
+                    if (govProofResult.data.compression) {
+                        console.log(`✅ Government proof compressed: ${govProofResult.data.compression.compressionRatio}% reduction`);
+                    }
                 } else {
                     return res.status(400).json({
                         success: false,

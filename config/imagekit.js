@@ -1,4 +1,5 @@
 const ImageKit = require('imagekit');
+const { processImageFile } = require('../utils/imageCompression');
 
 let imagekit = null;
 
@@ -32,13 +33,51 @@ const getImageKit = () => {
     return imagekit;
 };
 
-// Function to upload file to ImageKit
-const uploadToImageKit = async (file, fileName, folder) => {
+// Function to upload file to ImageKit with compression
+const uploadToImageKit = async (file, fileName, folder, options = {}) => {
     try {
         const imageKit = getImageKit();
         
+        // Default compression settings
+        const defaultOptions = {
+            compressImages: true,
+            targetSizeKB: 30,
+            preserveOriginal: false
+        };
+        
+        const config = { ...defaultOptions, ...options };
+        
+        let uploadBuffer = file.buffer;
+        let uploadMimeType = file.mimetype;
+        let compressionStats = null;
+        
+        // Compress image if it's an image file and compression is enabled
+        if (config.compressImages && file.mimetype.startsWith('image/')) {
+            try {
+                console.log(`📸 Compressing image before upload: ${fileName}`);
+                const compressionResult = await processImageFile(file, config.targetSizeKB);
+                
+                uploadBuffer = compressionResult.buffer;
+                uploadMimeType = compressionResult.mimeType;
+                
+                compressionStats = {
+                    originalSize: compressionResult.originalSize,
+                    compressedSize: compressionResult.compressedSize,
+                    compressionRatio: ((compressionResult.originalSize - compressionResult.compressedSize) / compressionResult.originalSize * 100).toFixed(1)
+                };
+                
+                console.log(`✅ Image compressed: ${(compressionResult.originalSize/1024).toFixed(2)}KB → ${(compressionResult.compressedSize/1024).toFixed(2)}KB (${compressionStats.compressionRatio}% reduction)`);
+                
+            } catch (compressionError) {
+                console.error('Image compression failed, uploading original:', compressionError.message);
+                // If compression fails, use original file
+                uploadBuffer = file.buffer;
+                uploadMimeType = file.mimetype;
+            }
+        }
+        
         const uploadResult = await imageKit.upload({
-            file: file.buffer, // Buffer from multer
+            file: uploadBuffer,
             fileName: fileName,
             folder: folder,
             useUniqueFileName: false,
@@ -51,7 +90,8 @@ const uploadToImageKit = async (file, fileName, folder) => {
                 url: uploadResult.url,
                 fileId: uploadResult.fileId,
                 filePath: uploadResult.filePath,
-                thumbnailUrl: uploadResult.thumbnailUrl
+                thumbnailUrl: uploadResult.thumbnailUrl,
+                compression: compressionStats
             }
         };
     } catch (error) {

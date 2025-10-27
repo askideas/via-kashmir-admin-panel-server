@@ -12,14 +12,15 @@ const storage = multer.memoryStorage(); // Store files in memory as Buffer
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit per file
+        fileSize: 10 * 1024 * 1024, // 10MB limit per file (before compression)
     },
     fileFilter: (req, file, cb) => {
         // Accept only image files
-        if (file.mimetype.startsWith('image/')) {
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Only image files are allowed!'), false);
+            cb(new Error(`Only image files are allowed! Supported formats: ${allowedTypes.join(', ')}`), false);
         }
     }
 });
@@ -51,21 +52,24 @@ router.use((error, req, res, next) => {
         if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).json({
                 success: false,
-                message: 'File too large. Maximum size allowed is 5MB.'
+                message: 'File too large. Maximum size allowed is 10MB (will be compressed to ~30KB during upload).',
+                error: 'FILE_SIZE_LIMIT'
             });
         }
         if (error.code === 'LIMIT_FILE_COUNT') {
             return res.status(400).json({
                 success: false,
-                message: 'Too many files. Only one file per field is allowed.'
+                message: 'Too many files. Only one file per field is allowed.',
+                error: 'FILE_COUNT_LIMIT'
             });
         }
     }
     
-    if (error.message === 'Only image files are allowed!') {
+    if (error.message.includes('Only image files are allowed!')) {
         return res.status(400).json({
             success: false,
-            message: 'Only image files are allowed for profile picture and government proof.'
+            message: 'Invalid file format. Supported formats: JPEG, JPG, PNG, WebP',
+            error: 'INVALID_FILE_TYPE'
         });
     }
     
