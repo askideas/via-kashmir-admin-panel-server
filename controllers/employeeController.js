@@ -40,10 +40,8 @@ const generateUniqueEmployeeId = async () => {
     return employeeId.toString();
 };
 
-class EmployeeController {
-
-    // Add new employee
-    async addEmployee(req, res) {
+// Add new employee
+const addEmployee = async (req, res) => {
         try {
             const employeeData = req.body;
             const files = req.files;
@@ -188,10 +186,10 @@ class EmployeeController {
                 error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
             });
         }
-    }
+};
 
-    // Get all employees
-    async getAllEmployees(req, res) {
+// Get all employees
+const getAllEmployees = async (req, res) => {
         try {
             const db = getFirestore();
             const employeesRef = db.collection('employees');
@@ -230,10 +228,10 @@ class EmployeeController {
                 error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
             });
         }
-    }
+};
 
-    // Get employee by ID
-    async getEmployeeById(req, res) {
+// Get employee by ID
+const getEmployeeById = async (req, res) => {
         try {
             const { id } = req.params;
             const db = getFirestore();
@@ -264,10 +262,10 @@ class EmployeeController {
                 error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
             });
         }
-    }
+};
 
-    // Update employee
-    async updateEmployee(req, res) {
+// Update employee
+const updateEmployee = async (req, res) => {
         try {
             const { id } = req.params;
             const updateData = req.body;
@@ -305,10 +303,10 @@ class EmployeeController {
                 error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
             });
         }
-    }
+};
 
-    // Delete employee (soft delete)
-    async deleteEmployee(req, res) {
+// Delete employee (soft delete)
+const deleteEmployee = async (req, res) => {
         try {
             const { id } = req.params;
             const db = getFirestore();
@@ -343,7 +341,12 @@ class EmployeeController {
                 error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
             });
         }
-    }
-}
+};
 
-module.exports = new EmployeeController();
+module.exports = {
+    addEmployee,
+    getAllEmployees,
+    getEmployeeById,
+    updateEmployee,
+    deleteEmployee
+};

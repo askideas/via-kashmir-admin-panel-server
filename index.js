@@ -12,8 +12,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Initialize Firebase and ImageKit
-initializeFirebase();
-initializeImageKit();
+try {
+    initializeFirebase();
+    initializeImageKit();
+} catch (error) {
+    console.error('Initialization error:', error.message);
+    // Don't exit the process in serverless environments
+}
 
 // Middleware
 app.use(cors());
@@ -24,6 +29,19 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
     res.json({
         message: 'Via Kashmir Admin Server is running!',
+        status: 'success',
+        timestamp: new Date().toISOString(),
+        endpoints: {
+            categories: '/categories',
+            employees: '/employees'
+        }
+    });
+});
+
+// Health check for employees
+app.get('/health/employees', (req, res) => {
+    res.json({
+        message: 'Employee endpoints are ready',
         status: 'success',
         timestamp: new Date().toISOString()
     });

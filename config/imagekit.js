@@ -5,6 +5,12 @@ let imagekit = null;
 const initializeImageKit = () => {
     try {
         if (!imagekit) {
+            // Check if all required environment variables are present
+            if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+                console.warn('⚠️  ImageKit credentials not found in environment variables');
+                return;
+            }
+
             imagekit = new ImageKit({
                 publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
                 privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
@@ -14,13 +20,14 @@ const initializeImageKit = () => {
         }
     } catch (error) {
         console.error('❌ Error initializing ImageKit:', error.message);
-        throw new Error('Failed to initialize ImageKit');
+        // Don't throw error in serverless environments
+        console.warn('⚠️  ImageKit initialization failed, file upload features will be disabled');
     }
 };
 
 const getImageKit = () => {
     if (!imagekit) {
-        throw new Error('ImageKit is not initialized. Call initializeImageKit() first.');
+        throw new Error('ImageKit is not initialized. Please check your ImageKit credentials in environment variables.');
     }
     return imagekit;
 };
